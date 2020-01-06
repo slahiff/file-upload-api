@@ -1,15 +1,15 @@
 const mongoose = require('mongoose')
 
 const uploadSchema = new mongoose.Schema({
-  title: {
+  fileType: {
     type: String,
     required: true
   },
-  text: {
+  fileName: {
     type: String,
     required: true
   },
-  owner: {
+  fileUrl: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
