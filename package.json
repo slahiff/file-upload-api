@@ -1,5 +1,5 @@
 {
-  "name": "FILE-UPLOAD-API",
+  "name": "file-upload-api",
   "version": "0.0.1",
   "description": "",
   "main": "server.js",
@@ -23,7 +23,8 @@
     "mongodb": "^3.4.0",
     "mongoose": "^5.8.1",
     "passport": "^0.4.1",
-    "passport-http-bearer": "^1.0.1",
+    "passport-http-bearer": "1.0.1",
+    "superagent": "^5.1.3",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
