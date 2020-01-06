@@ -4,7 +4,10 @@ const express = require('express')
 const passport = require('passport')
 
 // pull in Mongoose model for upload
-const Example = require('../models/upload')
+const Upload = require('../models/upload')
+
+// include s3 upload api node_module
+const s3Upload = require('../../lib/s3Upload')
 
 // this is a collection of methods that help us detect situations when we need
 // to throw a custom error
@@ -30,7 +33,7 @@ const router = express.Router()
 // INDEX
 // GET /upload
 router.get('/upload', requireToken, (req, res, next) => {
-  Example.find()
+  Upload.find()
     .then(upload => {
       // `upload` will be an array of Mongoose documents
       // we want to convert each one to a POJO, so we use `.map` to
@@ -47,7 +50,7 @@ router.get('/upload', requireToken, (req, res, next) => {
 // GET /upload/5a7db6c74d55bc51bdf39793
 router.get('/upload/:id', requireToken, (req, res, next) => {
   // req.params.id will be set based on the `:id` in the route
-  Example.findById(req.params.id)
+  Upload.findById(req.params.id)
     .then(handle404)
     // if `findById` is succesful, respond with 200 and "upload" JSON
     .then(upload => res.status(200).json({ upload: upload.toObject() }))
@@ -57,11 +60,18 @@ router.get('/upload/:id', requireToken, (req, res, next) => {
 
 // CREATE
 // POST /upload
-router.post('/upload', requireToken, (req, res, next) => {
-  // set owner of new example to be current user
-  req.body.upload.owner = req.user.id
+router.post('/uploads', (req, res, next) => {
+  // set owner of new Upload to be current user
+  // req.body.upload.owner = req.user.id
 
-  Example.create(req.body.upload)
+  s3Upload('text-test.txt', 'Hello World!')
+    .then(data => {
+      return Upload.create({
+        fileName: data.key,
+        fileType: 'NA',
+        fileUrl: data.Location
+      })
+    })
     // respond to succesful `create` with status 201 and JSON of new "upload"
     .then(upload => {
       res.status(201).json({ upload: upload.toObject() })
@@ -79,7 +89,7 @@ router.patch('/upload/:id', requireToken, removeBlanks, (req, res, next) => {
   // owner, prevent that by deleting that key/value pair
   delete req.body.upload.owner
 
-  Example.findById(req.params.id)
+  Upload.findById(req.params.id)
     .then(handle404)
     .then(upload => {
       // pass the `req` object and the Mongoose record to `requireOwnership`
@@ -98,7 +108,7 @@ router.patch('/upload/:id', requireToken, removeBlanks, (req, res, next) => {
 // DESTROY
 // DELETE /uploads/5a7db6c74d55bc51bdf39793
 router.delete('/uploads/:id', requireToken, (req, res, next) => {
-  Example.findById(req.params.id)
+  Upload.findById(req.params.id)
     .then(handle404)
     .then(upload => {
       // throw an error if current user doesn't own `upload`

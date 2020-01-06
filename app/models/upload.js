@@ -10,7 +10,7 @@ const uploadSchema = new mongoose.Schema({
     required: true
   },
   fileUrl: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     ref: 'User',
     required: true
   }
